@@ -7,6 +7,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import settings
 from app.models.user import User  # noqa: F401
+from app.models.pantry import PantryItem
 from sqlmodel import SQLModel
 
 config = context.config
