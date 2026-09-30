@@ -9,7 +9,7 @@ from app.core.security import get_current_user
 from app.db.session import get_session
 from app.models.user import User
 from app.schemas.recipes import RecipeGenerateRequest, RecipeRead
-from app.services.ai_client import get_ai_provider
+from app.services.ai_client import NoLocalRecipeError, RecipeProviderError, get_ai_provider
 from app.services.allergen_filter import (
     AllergenDetectedException,
     validate_recipe_ingredients,
@@ -32,13 +32,20 @@ async def generate_recipe(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> RecipeRead:
-    """Generate a recipe and reject any result containing a user's allergens."""
+    """Generate a recipe using the selected provider and enforce allergy checks.
+
+    Provider calls have a 15-second ceiling. Deterministic allergen failures are
+    retried up to three times; the response schema remains the same regardless
+    of whether the provider is local, mocked, or external.
+    """
     prompt = build_recipe_context(session, current_user.id)
+    allergies = current_user.alergias if isinstance(current_user.alergias, list) else []
+    if allergies and not prompt.startswith("Ingredientes en despensa:"):
+        prompt = f"{prompt}\nAlergias prohibidas: [{', '.join(allergies)}]."
     if payload and payload.excluir_receta:
         prompt = f"{prompt}\nExcluir la receta [{payload.excluir_receta}]."
 
     provider = get_ai_provider()
-    allergies = current_user.alergias if isinstance(current_user.alergias, list) else []
     for _ in range(MAX_GENERATION_ATTEMPTS):
         try:
             recipe = await asyncio.wait_for(
@@ -46,6 +53,10 @@ async def generate_recipe(
             )
         except asyncio.TimeoutError as exc:
             raise HTTPException(status_code=504, detail=TIMEOUT_MESSAGE) from exc
+        except NoLocalRecipeError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except RecipeProviderError as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
         try:
             validate_recipe_ingredients(recipe.ingredientes, allergies)
         except AllergenDetectedException as exc:

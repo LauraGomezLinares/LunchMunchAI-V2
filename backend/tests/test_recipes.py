@@ -53,7 +53,7 @@ def client() -> Generator[TestClient, None, None]:
     SQLModel.metadata.drop_all(test_engine)
 
 
-def test_generate_recipe_uses_mock_provider(client: TestClient) -> None:
+def test_generate_recipe_uses_local_provider_by_default(client: TestClient) -> None:
     response = client.post("/api/v1/recipes/generate")
 
     assert response.status_code == 200
@@ -69,6 +69,98 @@ def test_generate_recipe_uses_mock_provider(client: TestClient) -> None:
         "pasos",
         "apto_para_alergias",
     }
+
+
+def test_local_provider_retrieves_recipe_matching_pantry(client: TestClient) -> None:
+    with Session(test_engine) as session:
+        user = session.exec(select(User)).one()
+        session.add(
+            PantryItem(
+                ingrediente="lentejas",
+                cantidad=1,
+                unidad="kg",
+                usuario_id=user.id,
+            )
+        )
+        session.commit()
+
+    response = client.post("/api/v1/recipes/generate")
+
+    assert response.status_code == 200
+    assert response.json()["nombre"] == "Lentejas con verduras"
+    assert "lentejas" in response.json()["ingredientes"]
+
+
+def test_local_provider_rejects_unclassified_pantry_items(
+    client: TestClient,
+) -> None:
+    with Session(test_engine) as session:
+        user = session.exec(select(User)).one()
+        session.add(
+            PantryItem(
+                ingrediente="fruta inventada",
+                cantidad=1,
+                unidad="kg",
+                usuario_id=user.id,
+            )
+        )
+        session.commit()
+
+    response = client.post("/api/v1/recipes/generate")
+
+    assert response.status_code == 422
+
+
+def test_unknown_pantry_name_does_not_match_a_partial_recipe_word(
+    client: TestClient,
+) -> None:
+    with Session(test_engine) as session:
+        user = session.exec(select(User)).one()
+        session.add(
+            PantryItem(
+                ingrediente="sal",
+                cantidad=1,
+                unidad="g",
+                usuario_id=user.id,
+            )
+        )
+        session.commit()
+
+    response = client.post("/api/v1/recipes/generate")
+
+    assert response.status_code == 422
+
+
+def test_local_provider_uses_taxonomy_allergen_classification(
+    client: TestClient,
+) -> None:
+    with Session(test_engine) as session:
+        user = session.exec(select(User)).one()
+        user.alergias = ["Gluten"]
+        session.add(user)
+        session.add(
+            PantryItem(
+                ingrediente="pasta",
+                cantidad=1,
+                unidad="paquete",
+                usuario_id=user.id,
+            )
+        )
+        session.commit()
+
+    response = client.post("/api/v1/recipes/generate")
+
+    assert response.status_code == 422
+
+
+def test_excluded_local_recipe_returns_an_alternative(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/recipes/generate",
+        json={"excluir_receta": "Bowl de arroz y verduras"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["nombre"] != "Bowl de arroz y verduras"
 
 
 def test_generate_recipe_timeout_returns_504(

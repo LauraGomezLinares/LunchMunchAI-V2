@@ -14,7 +14,13 @@ EMPTY_PANTRY_PROMPT = (
 
 
 def build_recipe_context(session: Session, user_id: UUID) -> str:
-    """Return the required system context for the user's pantry and allergies."""
+    """Build the stable provider context from the user's persisted data.
+
+    Pantry rows are scoped by `usuario_id`. With a non-empty pantry, the result
+    includes pantry names and the user's allergy list. With no rows, it returns
+    the exact fallback requested by Sprint 2; the recipe router separately
+    appends allergies so providers still receive safety restrictions.
+    """
     pantry_items = session.exec(
         select(PantryItem).where(PantryItem.usuario_id == user_id)
     ).all()

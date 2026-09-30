@@ -17,7 +17,11 @@ ALLOWED_ALLERGIES = (
 
 
 class ProfileUpdate(BaseModel):
-    """Partial profile update; allergies are the only editable field here."""
+    """Partial profile update containing only the allergy array.
+
+    Every value must match the public catalog; FastAPI returns HTTP 422 for
+    unknown labels.
+    """
 
     alergias: list[str]
 
@@ -32,7 +36,7 @@ class ProfileUpdate(BaseModel):
 
 
 class ProfileRead(BaseModel):
-    """Authenticated profile representation."""
+    """Profile response consumed by authenticated clients."""
 
     model_config = ConfigDict(from_attributes=True)
 

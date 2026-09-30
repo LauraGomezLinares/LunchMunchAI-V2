@@ -14,6 +14,7 @@ router = APIRouter(prefix="/api/v1/users", tags=["users"])
 
 
 def _profile_response(user: User) -> ProfileRead:
+    """Serialize only the profile fields exposed by this router."""
     allergies = user.alergias if isinstance(user.alergias, list) else []
     return ProfileRead(
         id=user.id,
@@ -26,7 +27,7 @@ def _profile_response(user: User) -> ProfileRead:
 
 @router.get("/profile", response_model=ProfileRead)
 def get_profile(current_user: User = Depends(get_current_user)) -> ProfileRead:
-    """Return the authenticated user's profile."""
+    """Return the authenticated user's profile and persisted restrictions."""
     return _profile_response(current_user)
 
 
@@ -36,7 +37,7 @@ def update_profile(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> ProfileRead:
-    """Update only allergies without requiring other profile fields."""
+    """Persist allergies while leaving name and nutrition objectives untouched."""
     current_user.alergias = payload.alergias
     current_user.updated_at = datetime.now(timezone.utc)
     session.add(current_user)

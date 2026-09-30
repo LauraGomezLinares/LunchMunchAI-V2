@@ -16,6 +16,10 @@ from app.services.allergen_filter import (
         (["Proteína de GLUTEN"], ["gluten"]),
         (["Queso añejo"], ["ANeJO"]),
         (["Salsa-de-SOYA"], ["soya"]),
+        (["Almond flour"], ["Frutos secos"]),
+        (["Whole milk"], ["Lácteos"]),
+        (["harina de trigo"], ["Gluten"]),
+        (["cacahuate tostado"], ["Maní"]),
     ],
 )
 def test_detects_exact_partial_and_normalized_matches(
