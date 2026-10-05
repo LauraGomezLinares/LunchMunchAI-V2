@@ -23,8 +23,8 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    firebase_credentials_json: str = Field(
-        default="", validation_alias="FIREBASE_CREDENTIALS_JSON"
+    firebase_credentials_path: str = Field(
+        default="", validation_alias="FIREBASE_CREDENTIALS_PATH"
     )
     firebase_project_id: str = Field(default="", validation_alias="FIREBASE_PROJECT_ID")
     jwt_secret: str = Field(

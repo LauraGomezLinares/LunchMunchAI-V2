@@ -24,11 +24,11 @@ def _firebase_app() -> firebase_admin.App:
     """Initialize Firebase once, using inline JSON credentials when configured."""
     if firebase_admin._apps:
         return firebase_admin.get_app()
-    if not settings.firebase_credentials_json:
+    if not settings.firebase_credentials_path:
         raise RuntimeError("Firebase credentials are not configured")
     try:
-        credential_data = json.loads(settings.firebase_credentials_json)
-        credential = credentials.Certificate(credential_data)
+        #credential_data = json.loads(settings.firebase_credentials_path)
+        credential = credentials.Certificate(settings.firebase_credentials_path)
     except (json.JSONDecodeError, ValueError, TypeError) as exc:
         logger.error("Invalid Firebase credentials configuration")
         raise RuntimeError("Invalid Firebase credentials configuration") from exc
