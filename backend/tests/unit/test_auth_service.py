@@ -1,4 +1,10 @@
-"""Unit tests for authentication service logic with pure mocks."""
+"""Unit tests for authentication service logic with pure mocks.
+
+Architecture notes:
+- Evaluates user synchronization rules between external Firebase claims and local database records.
+- Uses unittest.mock.MagicMock for SQLModel sessions to verify persistence operations (add, commit, refresh)
+  without touching any physical or in-memory database.
+"""
 
 from typing import Any
 from unittest.mock import MagicMock
@@ -9,11 +15,6 @@ from fastapi import HTTPException
 
 from app.models.user import User
 from app.services import auth_service
-
-
-# En `test_auth_service.py` evaluamos las reglas de negocio de sincronización entre
-# Firebase claims y el perfil local de la base de datos sin depender de conexiones reales.
-# Usamos `MagicMock` para la sesión de base de datos y `mocker` para las utilidades de Firebase/JWT.
 
 
 def test_get_user_by_email_normalizes_to_lowercase() -> None:
@@ -47,7 +48,6 @@ def test_get_user_by_firebase_uid() -> None:
 def test_create_user_from_firebase_new_user_success(mocker: Any) -> None:
     """Validate creating and persisting a brand new user from trusted Firebase claims."""
     mock_session = MagicMock()
-    # No existe usuario previo por UID ni por Email
     mocker.patch("app.services.auth_service.get_user_by_firebase_uid", return_value=None)
     mocker.patch("app.services.auth_service.get_user_by_email", return_value=None)
 
@@ -59,7 +59,6 @@ def test_create_user_from_firebase_new_user_success(mocker: Any) -> None:
 
     user = auth_service.create_user_from_firebase(mock_session, claims)
 
-    # Verifica que el correo se haya normalizado a minúsculas
     assert user.email == "newuser@mealmuse.com"
     assert user.firebase_uid == "fb-new-user"
     assert user.nombre == "New User Name"
@@ -108,13 +107,11 @@ def test_create_user_from_firebase_missing_claims_raises_401() -> None:
     """Validate that missing UID or Email in claims raises HTTPException 401."""
     mock_session = MagicMock()
 
-    # Falta 'email'
     with pytest.raises(HTTPException) as exc_info_1:
         auth_service.create_user_from_firebase(mock_session, {"uid": "user-123"})
     assert exc_info_1.value.status_code == 401
     assert "El token no contiene una identidad válida." in exc_info_1.value.detail
 
-    # Falta 'uid' / 'sub'
     with pytest.raises(HTTPException) as exc_info_2:
         auth_service.create_user_from_firebase(
             mock_session, {"email": "user@mealmuse.com"}
@@ -147,7 +144,6 @@ def test_create_user_from_firebase_duplicate_email_conflict_raises_409(
         nombre="Original Owner",
     )
 
-    # Búsqueda por UID no encuentra nada (es nuevo), pero búsqueda por Email encuentra al usuario previo
     mocker.patch(
         "app.services.auth_service.get_user_by_firebase_uid", return_value=None
     )

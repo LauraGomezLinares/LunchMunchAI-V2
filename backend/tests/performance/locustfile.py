@@ -1,4 +1,13 @@
-"""Locust performance and load testing scenarios for MealMuse API."""
+"""Locust performance and load testing scenarios for MealMuse API.
+
+Architecture notes:
+1. Zero-Quota Impact Strategy:
+   To prevent exhausting external Google Firebase Admin SDK rate limits during high-concurrency
+   stress testing, local JWT tokens are generated directly using the environment's `jwt_secret`.
+2. Idempotent Test User Provisioning:
+   Pre-seeds a dedicated load-testing user into the local SQLite database to ensure
+   authenticated inventory queries (/api/v1/pantry/) succeed without 401 Unauthorized errors.
+"""
 
 import logging
 from locust import HttpUser, between, task
@@ -10,15 +19,6 @@ from app.db.session import engine, init_db
 from app.models.user import User
 
 logger = logging.getLogger(__name__)
-
-# EXPLICACIÓN ARQUITECTÓNICA (POR QUÉ Y CÓMO):
-# 1. Estrategia de Autenticación Segura (Zero-Quota Impact):
-#    Para evitar agotar las cuotas de Google Firebase Admin SDK durante pruebas de estrés
-#    con cientos de peticiones por segundo, generamos tokens JWT firmados localmente
-#    con `jwt_secret` del entorno.
-# 2. Pre-siembra de Usuario (Idempotente):
-#    Aseguramos que el usuario de prueba de carga exista en la base de datos local SQLite
-#    para que el endpoint `/api/v1/pantry/` valide la sesión sin fallos 401.
 
 
 def _ensure_performance_test_user() -> tuple[str, str]:
@@ -47,7 +47,6 @@ def _ensure_performance_test_user() -> tuple[str, str]:
 class MealMuseApiUser(HttpUser):
     """Simulates realistic concurrent mobile client traffic with weighted tasks."""
 
-    # Tiempo de espera simulado entre peticiones (entre 0.5 y 1.5 segundos)
     wait_time = between(0.5, 1.5)
 
     def on_start(self) -> None:

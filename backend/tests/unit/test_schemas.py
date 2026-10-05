@@ -1,4 +1,9 @@
-"""Unit tests for Pydantic validation schemas (Auth, User, Pantry)."""
+"""Unit tests for Pydantic validation schemas (Auth, User, Pantry).
+
+Architecture notes:
+- Evaluates type constraints, numeric boundaries, string lengths, and format invariants
+  declared in Pydantic models independently of any database or HTTP framework lifecycle.
+"""
 
 from datetime import date
 from typing import Any
@@ -9,10 +14,6 @@ from pydantic import ValidationError
 from app.schemas.auth import FirebaseLoginRequest, Token, UserLogin, UserRegister
 from app.schemas.pantry import PantryItemCreate, PantryItemRead, PantryItemUpdate
 from app.schemas.user import UserBase, UserRead, UserUpdate
-
-
-# En `test_schemas.py` evaluamos las restricciones, tipos e invariantes declaradas
-# en los modelos de validación de Pydantic sin necesidad de inicializar bases de datos ni clientes HTTP.
 
 
 def test_pantry_item_create_valid() -> None:
@@ -47,12 +48,10 @@ def test_pantry_item_create_zero_or_negative_quantity_raises_validation_error(
 
 def test_pantry_item_create_empty_ingrediente_or_unidad_raises_validation_error() -> None:
     """Validate that empty strings for required fields trigger min_length=1 validation error."""
-    # Ingrediente vacío
     with pytest.raises(ValidationError) as exc_info_1:
         PantryItemCreate(ingrediente="", cantidad=1.0, unidad="kg")
     assert any(err["loc"] == ("ingrediente",) for err in exc_info_1.value.errors())
 
-    # Unidad vacía
     with pytest.raises(ValidationError) as exc_info_2:
         PantryItemCreate(ingrediente="Arroz", cantidad=1.0, unidad="")
     assert any(err["loc"] == ("unidad",) for err in exc_info_2.value.errors())
@@ -63,12 +62,10 @@ def test_pantry_item_create_max_length_exceeded_raises_validation_error() -> Non
     long_ingredient = "A" * 121
     long_unit = "U" * 21
 
-    # Ingrediente > 120 caracteres
     with pytest.raises(ValidationError) as exc_info_1:
         PantryItemCreate(ingrediente=long_ingredient, cantidad=1.0, unidad="kg")
     assert any(err["loc"] == ("ingrediente",) for err in exc_info_1.value.errors())
 
-    # Unidad > 20 caracteres
     with pytest.raises(ValidationError) as exc_info_2:
         PantryItemCreate(ingrediente="Sal", cantidad=1.0, unidad=long_unit)
     assert any(err["loc"] == ("unidad",) for err in exc_info_2.value.errors())
@@ -81,7 +78,7 @@ def test_pantry_item_create_invalid_date_format_raises_validation_error() -> Non
             ingrediente="Leche",
             cantidad=1.0,
             unidad="L",
-            fecha_caducidad="31-12-2026",  # Formato incorrecto (debe ser YYYY-MM-DD o date)
+            fecha_caducidad="31-12-2026",
         )
     assert any(err["loc"] == ("fecha_caducidad",) for err in exc_info.value.errors())
 

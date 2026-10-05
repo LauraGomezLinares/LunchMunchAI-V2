@@ -1,4 +1,9 @@
-"""Integration tests for Authentication API endpoints with SQLite in-memory database."""
+"""Integration tests for Authentication API endpoints with SQLite in-memory database.
+
+Architecture notes:
+- Validates the end-to-end HTTP request/response contract across Router -> Schemas -> Services -> SQLite (StaticPool).
+- Verifies JSON payloads, HTTP status codes, security boundaries, and local persistence idempotency.
+"""
 
 from typing import Any, Callable
 
@@ -7,12 +12,6 @@ from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from app.services import auth_service
-
-
-# EXPLICACIÓN ARQUITECTÓNICA (POR QUÉ Y CÓMO):
-# En las pruebas de integración de `test_auth_api.py` validamos el ciclo de vida completo de la API HTTP:
-# Router -> Schemas -> Services -> SQLite en memoria (StaticPool).
-# Verificamos contratos JSON, códigos de estado HTTP y persistencia real en la BD de pruebas.
 
 
 def test_register_new_user_success(client: TestClient) -> None:

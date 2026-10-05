@@ -1,4 +1,10 @@
-"""Integration tests for Pantry API endpoints with multi-user isolation."""
+"""Integration tests for Pantry API endpoints with multi-user isolation.
+
+Architecture notes:
+- Evaluates CRUD operations, temporal sorting by expiration date, and partial updates on pantry inventory.
+- Tests multitenant authorization boundaries, verifying that user data is isolated strictly by 'usuario_id'
+  and unauthorized cross-tenant operations return HTTP 404 to avoid resource enumeration leaks.
+"""
 
 from uuid import uuid4
 
@@ -7,12 +13,6 @@ from sqlmodel import Session
 
 from app.core.security import create_access_token
 from app.models.user import User
-
-
-# EXPLICACIÓN ARQUITECTÓNICA (POR QUÉ Y CÓMO):
-# En `test_pantry_api.py` evaluamos las operaciones CRUD del inventario y la seguridad multitenant.
-# Verificamos que las consultas aíslen estrictamente los datos por `usuario_id` para que ningún
-# usuario pueda acceder, alterar o eliminar registros pertenecientes a otro usuario.
 
 
 def _create_secondary_user(db_session: Session) -> tuple[User, dict[str, str]]:
@@ -176,7 +176,6 @@ def test_delete_pantry_item_success(
     )
     assert delete_res.status_code == 204
 
-    # Verificamos que ya no aparezca en el listado
     list_res = client.get("/api/v1/pantry/", headers=auth_headers)
     assert all(item["id"] != created["id"] for item in list_res.json())
 

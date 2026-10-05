@@ -1,4 +1,11 @@
-"""Unit tests for core security and token handling utilities."""
+"""Unit tests for core security and token handling utilities.
+
+Architecture notes:
+- Uses pytest-mock and unittest.mock to completely isolate external dependencies
+  (Google Firebase Admin SDK and database sessions).
+- Validates cryptographic JWT encoding, expiration enforcement, tampering detection,
+  and authentication fallback resolution deterministically.
+"""
 
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -17,13 +24,6 @@ from app.core.security import (
     verify_firebase_token,
 )
 from app.models.user import User
-
-
-# EXPLICACIÓN ARQUITECTÓNICA (POR QUÉ Y CÓMO):
-# En las pruebas unitarias de seguridad aislamos completamente las dependencias externas
-# (Google Firebase Admin SDK y base de datos SQLModel/SQLAlchemy) mediante `pytest-mock` y `unittest.mock`.
-# Esto permite validar la lógica de cifrado, decodificación, expiración y control de acceso
-# de manera determinista, instantánea y sin efectos secundarios en disco o red.
 
 
 def test_create_access_token_structure() -> None:
@@ -56,7 +56,6 @@ def test_decode_access_token_success() -> None:
 
 def test_decode_access_token_expired() -> None:
     """Validate that an expired JWT raises HTTPException 401."""
-    # Creamos un token expirado en el pasado
     past_time = datetime.now(timezone.utc) - timedelta(hours=2)
     expired_payload: dict[str, Any] = {
         "sub": "user-expired",
@@ -91,7 +90,6 @@ def test_decode_access_token_invalid_signature() -> None:
 
 def test_verify_firebase_token_success(mocker: Any) -> None:
     """Validate verify_firebase_token decoding with mocked Firebase Admin SDK."""
-    # Mockeamos _firebase_app y auth.verify_id_token para no conectar con Google
     mocker.patch("app.core.security._firebase_app", return_value=MagicMock())
     mock_verify = mocker.patch(
         "firebase_admin.auth.verify_id_token",
@@ -141,7 +139,6 @@ def test_get_current_user_valid_jwt(mocker: Any) -> None:
         scheme="Bearer", credentials="valid.jwt.token"
     )
 
-    # Mockeamos la decodificación del token y la consulta al servicio de base de datos
     mocker.patch(
         "app.core.security._decode_access_token", return_value={"sub": "uid-jwt-1"}
     )
@@ -167,7 +164,6 @@ def test_get_current_user_fallback_to_firebase_token(mocker: Any) -> None:
         scheme="Bearer", credentials="raw.firebase.token"
     )
 
-    # El token no es un JWT local, genera fallo y cae en el fallback de Firebase
     mocker.patch(
         "app.core.security._decode_access_token",
         side_effect=HTTPException(status_code=401, detail="Not a local JWT"),

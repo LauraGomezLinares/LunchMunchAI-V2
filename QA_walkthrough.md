@@ -300,3 +300,22 @@ def client_fixture(
   .\.venv\Scripts\locust.exe -f tests/performance/locustfile.py --headless -u 50 -r 5 --run-time 30s --host http://127.0.0.1:8000 --html tests/reportes/test/sprint2/report_estres.html
   ```
 - **Reporte generado:** `backend/tests/reportes/test/sprint2/report_estres.html`
+
+---
+
+## 7. Cierre del Sprint 2: Estandarización y Calidad de Código (PEP 257 & PEP 8)
+
+Se realizó una refactorización integral de todos los módulos de pruebas y controladores HTTP para cumplir estrictamente con los estándares de la industria:
+- **Estandarización Docstrings (PEP 257):** Todas las clases, funciones y módulos cuentan con docstrings formales de triple comilla (`"""`), describiendo el propósito técnico, los contratos de entrada/salida y las decisiones arquitectónicas.
+- **Limpieza de Comentarios (PEP 8):** Se eliminaron encabezados informales y se consolidaron las notas técnicas y arquitectónicas.
+- **Módulos Estandarizados:**
+  - `backend/tests/conftest.py`
+  - `backend/tests/unit/test_security.py`
+  - `backend/tests/unit/test_auth_service.py`
+  - `backend/tests/unit/test_schemas.py`
+  - `backend/tests/integration/test_health_api.py`
+  - `backend/tests/integration/test_auth_api.py`
+  - `backend/tests/integration/test_pantry_api.py`
+  - `backend/tests/performance/locustfile.py`
+  - `backend/app/routers/pantry.py`
+- **Validación Final:** 77 de 77 pruebas ejecutadas y aprobadas (**100% PASS**) en 0.69 segundos.
