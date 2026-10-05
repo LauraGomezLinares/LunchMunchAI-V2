@@ -243,6 +243,25 @@ def client_fixture(
 - **Total de pruebas unitarias ejecutadas:** 40
 - **Total aprobadas:** 40 / 40 (**100% PASS**)
 - **Módulos cubiertos:** `core.security`, `services.auth_service`, `schemas.pantry`, `schemas.auth`, `schemas.user`.
+- **Documento formal:** [Docs/test/sprint2/testUnitarios.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/test/sprint2/testUnitarios.md)
 
-### 5.6. Próximo Paso: Fase 3 (Pruebas de Integración)
-- Implementación de `tests/integration/test_health_api.py`, `tests/integration/test_auth_api.py` y `tests/integration/test_pantry_api.py` utilizando SQLite en memoria con `StaticPool` y fixtures de [conftest.py](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/backend/tests/conftest.py).
+---
+
+## 6. Fase 3: Pruebas de Integración (En Progreso)
+
+### 6.1. Reestructuración de Documentos y Reportes
+- **Informes formales:** Organizados en `Docs/test/sprint2/` ([testUnitarios.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/test/sprint2/testUnitarios.md) y [testIntegracion.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/test/sprint2/testIntegracion.md)).
+- **Reportes visuales HTML:** Centralizados en `backend/tests/reportes/sprint2/`.
+
+### 6.2. Ejecución y Reporte Visual de `test_health_api.py` y `test_auth_api.py`
+
+- **Comando ejecutado:**
+  ```powershell
+  & "backend/.venv/Scripts/pytest.exe" tests/integration/test_health_api.py tests/integration/test_auth_api.py -v --html=tests/reportes/sprint2/report_integration_auth.html --self-contained-html
+  ```
+- **Resultado:** 12 de 12 pruebas de integración aprobadas (**12 PASSED**).
+- **Reporte generado:** `backend/tests/reportes/sprint2/report_integration_auth.html`
+- **Detalle formal registrado:** [Docs/test/sprint2/testIntegracion.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/test/sprint2/testIntegracion.md) (Casos PI-01 a PI-12).
+
+### 6.3. Próximo Paso en Fase 3
+- Implementación de `tests/integration/test_pantry_api.py` (Validación del CRUD completo de despensa, ordenamiento por fecha de caducidad, actualizaciones parciales y aislamiento multi-usuario).
