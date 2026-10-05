@@ -211,15 +211,24 @@ def client_fixture(
 
 ## 5. Fase 2: Pruebas Unitarias (En Progreso)
 
-### 5.1. Ejecución de `tests/unit/test_security.py`
+### 5.1. Política Estricta de Ramas (Branching)
+- **Rama Principal de Pruebas (`sprint2/test`):** Rama base donde únicamente se escribe código dentro de la carpeta `backend/tests/`. Si un test falla por un bug en el código de producción, el test DEBE permanecer en estado `FAILED` evidenciando el fallo. Está prohibido modificar código de producción en esta rama.
+- **Ramas de Resolución (`sprint2/test/fix-<nombre_del_archivo>`):** Ramas temporales creadas específicamente para aplicar parches al backend tras notificar y autorizar el error detectado. Los commits llevan exclusivamente el nombre del módulo afectado (ej. `core.security`).
 
-- **Comando ejecutado:**
-  ```powershell
-  & "backend/.venv/Scripts/pytest.exe" "tests/unit/test_security.py" -v
-  ```
-- **Resultado:** 10 de 10 pruebas unitarias aprobadas (**10 PASSED**) en 0.05 segundos.
-- **Detalle de casos y reporte formal:** Documentado en [Docs/registro_pruebas_sprint2.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/registro_pruebas_sprint2.md).
+### 5.2. Ejecución y Reporte Visual de `tests/unit/test_security.py`
 
-### 5.2. Próximos Pasos en Fase 2
+1. **Instalación del generador de reportes visuales:**
+   ```powershell
+   & "backend/.venv/Scripts/pip.exe" install pytest-html
+   ```
+
+2. **Ejecución de la suite con reporte HTML autocontenido:**
+   ```powershell
+   & "backend/.venv/Scripts/pytest.exe" tests/unit/test_security.py -v --html=report.html --self-contained-html
+   ```
+- **Resultado:** 10 de 10 pruebas unitarias aprobadas (**10 PASSED**).
+- **Reporte generado:** `backend/report.html`
+
+### 5.3. Próximos Pasos en Fase 2
 1. `tests/unit/test_auth_service.py` (Validación de reglas de negocio de sincronización y normalización de usuarios).
 2. `tests/unit/test_schemas.py` (Validación de invariantes en esquemas Pydantic).
