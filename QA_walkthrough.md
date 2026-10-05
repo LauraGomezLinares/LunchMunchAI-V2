@@ -263,5 +263,21 @@ def client_fixture(
 - **Reporte generado:** `backend/tests/reportes/sprint2/report_integration_auth.html`
 - **Detalle formal registrado:** [Docs/test/sprint2/testIntegracion.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/test/sprint2/testIntegracion.md) (Casos PI-01 a PI-12).
 
-### 6.3. Próximo Paso en Fase 3
-- Implementación de `tests/integration/test_pantry_api.py` (Validación del CRUD completo de despensa, ordenamiento por fecha de caducidad, actualizaciones parciales y aislamiento multi-usuario).
+### 6.3. Ejecución y Reporte Visual de `test_pantry_api.py`
+
+- **Comando ejecutado:**
+  ```powershell
+  & "backend/.venv/Scripts/pytest.exe" tests/integration/test_pantry_api.py -v --html=tests/reportes/test/sprint2/report_integration_pantry.html --self-contained-html
+  ```
+- **Resultado:** 13 de 13 pruebas de integración aprobadas (**13 PASSED**).
+- **Reporte generado:** `backend/tests/reportes/test/sprint2/report_integration_pantry.html`
+- **Detalle formal registrado:** [Docs/test/sprint2/testIntegracion.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/test/sprint2/testIntegracion.md) (Casos PI-13 a PI-25).
+
+### 6.4. Cierre de Fase 3 (Pruebas de Integración)
+- **Total de pruebas de integración ejecutadas:** 25
+- **Total aprobadas:** 25 / 25 (**100% PASS**)
+- **Módulos cubiertos:** `routers.health`, `routers.auth`, `routers.pantry`.
+- **Validaciones de Seguridad:** Confirmado el aislamiento multiusuario estricto en inventario.
+
+### 6.5. Próximo Paso: Fase 4 (Pruebas de Estrés y Carga con Locust)
+- Implementación de `tests/performance/locustfile.py` para simular tráfico concurrente en endpoints clave.

@@ -11,7 +11,7 @@
 
 | Tipo de Prueba | Total Diseñadas | Aprobadas (Pass) | Fallidas (Fail) | Cobertura de Módulo |
 | :--- | :---: | :---: | :---: | :---: |
-| **Pruebas de Integración (PI)** | 12 | 12 | 0 | `routers.health` (100%), `routers.auth` (100%) |
+| **Pruebas de Integración (PI)** | 25 | 25 | 0 | `routers.health` (100%), `routers.auth` (100%), `routers.pantry` (100%) |
 
 ---
 
@@ -40,3 +40,23 @@
 | **PI-10: Auth API** | Intento de consultar `GET /api/v1/auth/me` sin encabezado de autorización | Petición sin encabezado `Authorization` | `HTTP 401 Unauthorized` con detalle *"Se requiere un token Bearer."* | **PASS** |
 | **PI-11: Auth API** | Intento de consultar `GET /api/v1/auth/me` con token Bearer inválido/falso | Encabezado `Authorization: Bearer invalid.token.payload` | `HTTP 401 Unauthorized` | **PASS** |
 | **PI-12: Auth API** | Cierre de sesión de cliente en `POST /api/v1/auth/logout` | Petición POST a `/api/v1/auth/logout` | `HTTP 204 No Content` con cuerpo vacío | **PASS** |
+
+---
+
+### Módulo: Gestión de Despensa e Inventario Multiusuario (`routers.pantry`)
+
+| ID y Módulo de la Prueba | Descripción del Escenario | Input / Mock Inyectado | Output Esperado | Resultado (Pass/Fail) |
+| :--- | :--- | :--- | :--- | :---: |
+| **PI-13: Pantry API** | Creación exitosa de ingrediente en `POST /api/v1/pantry/` | `{"ingrediente": "Tomates", "cantidad": 500.0, "unidad": "g", "fecha_caducidad": "2026-10-15"}` + `auth_headers` | `HTTP 201 Created` con objeto `PantryItemRead` conteniendo `id`, `usuario_id` y `created_at` | **PASS** |
+| **PI-14: Pantry API** | Rechazo de creación con cantidad no positiva (`cantidad=0`) | `{"ingrediente": "Sal", "cantidad": 0, "unidad": "g"}` | `HTTP 422 Unprocessable Entity` | **PASS** |
+| **PI-15: Pantry API** | Rechazo de creación sin autenticación | Petición POST a `/api/v1/pantry/` sin encabezado `Authorization` | `HTTP 401 Unauthorized` | **PASS** |
+| **PI-16: Pantry API** | Listado de despensa vacía al iniciar | `GET /api/v1/pantry/` para usuario sin ingredientes | `HTTP 200 OK` con JSON `[]` | **PASS** |
+| **PI-17: Pantry API** | Ordenamiento de despensa por fecha de caducidad (`asc().nulls_last()`) | 3 ingredientes con fechas: `"2026-10-25"`, `None`, `"2026-10-10"` | `HTTP 200 OK` retornando lista ordenada: 10/10 $\to$ 25/10 $\to$ `null` | **PASS** |
+| **PI-18: Pantry API** | Actualización parcial en `PUT /api/v1/pantry/{item_id}` | `{"cantidad": 6.0}` sobre ítem con cantidad 12.0 | `HTTP 200 OK` con `cantidad=6.0` y demás atributos preservados | **PASS** |
+| **PI-19: Pantry API** | Actualización de ingrediente inexistente | `PUT /api/v1/pantry/{uuid_aleatorio}` | `HTTP 404 Not Found` con detalle *"Ingrediente no encontrado"* | **PASS** |
+| **PI-20: Pantry API** | Rechazo de cantidad inválida en actualización (`cantidad=-2.0`) | `PUT /api/v1/pantry/{item_id}` con `cantidad=-2.0` | `HTTP 422 Unprocessable Entity` | **PASS** |
+| **PI-21: Pantry API** | Eliminación exitosa de ingrediente en `DELETE /api/v1/pantry/{item_id}` | `DELETE /api/v1/pantry/{item_id}` con `auth_headers` | `HTTP 204 No Content`, y exclusión confirmada en listado posterior | **PASS** |
+| **PI-22: Pantry API** | Eliminación de ingrediente inexistente | `DELETE /api/v1/pantry/{uuid_aleatorio}` | `HTTP 404 Not Found` con detalle *"Ingrediente no encontrado"* | **PASS** |
+| **PI-23: Pantry API (Seguridad Multitenant)** | Aislamiento de listado entre usuarios | Usuario A crea ingredientes. Usuario B consulta `GET /api/v1/pantry/` | `HTTP 200 OK` con `[]` para Usuario B (no ve datos de Usuario A) | **PASS** |
+| **PI-24: Pantry API (Seguridad Multitenant)** | Intento de modificación cruzada entre usuarios | Usuario B intenta `PUT /api/v1/pantry/{item_id_usuario_A}` | `HTTP 404 Not Found` impidiendo modificación y fuga de existencia | **PASS** |
+| **PI-25: Pantry API (Seguridad Multitenant)** | Intento de eliminación cruzada entre usuarios | Usuario B intenta `DELETE /api/v1/pantry/{item_id_usuario_A}` | `HTTP 404 Not Found`, manteniéndose el ítem intacto para Usuario A | **PASS** |
