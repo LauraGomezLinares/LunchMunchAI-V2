@@ -229,6 +229,15 @@ def client_fixture(
 - **Resultado:** 10 de 10 pruebas unitarias aprobadas (**10 PASSED**).
 - **Reporte generado:** `backend/report.html`
 
-### 5.3. Próximos Pasos en Fase 2
-1. `tests/unit/test_auth_service.py` (Validación de reglas de negocio de sincronización y normalización de usuarios).
-2. `tests/unit/test_schemas.py` (Validación de invariantes en esquemas Pydantic).
+### 5.3. Ejecución y Reporte Visual de `tests/unit/test_auth_service.py`
+
+- **Comando ejecutado:**
+  ```powershell
+  & "backend/.venv/Scripts/pytest.exe" tests/unit/test_auth_service.py -v --html=report_auth_service.html --self-contained-html
+  ```
+- **Resultado:** 12 de 12 pruebas unitarias aprobadas (**12 PASSED**).
+- **Reporte generado:** `backend/report_auth_service.html`
+- **Detalle formal registrado:** [Docs/registro_pruebas_sprint2.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/registro_pruebas_sprint2.md) (Casos PU-11 a PU-22).
+
+### 5.4. Próximos Pasos en Fase 2
+1. `tests/unit/test_schemas.py` (Validación de invariantes en esquemas Pydantic).

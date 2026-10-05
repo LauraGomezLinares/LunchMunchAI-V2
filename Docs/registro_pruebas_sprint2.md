@@ -11,7 +11,7 @@
 
 | Tipo de Prueba | Total Diseñadas | Aprobadas (Pass) | Fallidas (Fail) | Cobertura de Módulo |
 | :--- | :---: | :---: | :---: | :---: |
-| **Pruebas Unitarias (PU)** | 10 | 10 | 0 | `app.core.security` (100%) |
+| **Pruebas Unitarias (PU)** | 22 | 22 | 0 | `app.core.security` (100%), `app.services.auth_service` (100%) |
 | **Pruebas de Integración (PI)** | 0 (Pendiente) | 0 | 0 | - |
 | **Pruebas de Rendimiento (PE)** | 0 (Pendiente) | 0 | 0 | - |
 
@@ -36,8 +36,27 @@
 
 ---
 
+### Módulo: Lógica de Negocio de Autenticación (`app.services.auth_service`)
+
+| ID y Módulo de la Prueba | Descripción del Escenario | Input / Mock Inyectado | Output Esperado | Resultado (Pass/Fail) |
+| :--- | :--- | :--- | :--- | :---: |
+| **PU-11: Auth Service** | Normalización de email a minúsculas en búsqueda local (`get_user_by_email`) | `email="TEST@MEALMUSE.COM"`. Mock de `Session.exec` retornando `User` | Consulta SQL filtrando exactamente por `test@mealmuse.com` | **PASS** |
+| **PU-12: Auth Service** | Búsqueda de usuario por UID de Firebase (`get_user_by_firebase_uid`) | `firebase_uid="fb-uid-100"`. Mock de `Session.exec` | Retorno de objeto `User` correspondiente al UID buscado | **PASS** |
+| **PU-13: Auth Service** | Creación exitosa de usuario nuevo desde claims válidos de Firebase (`create_user_from_firebase`) | Claims: `uid="fb-new-user"`, `email="NEWUSER@MEALMUSE.COM"`, `name="New User Name"`. Mocks de búsqueda retornando `None` | Usuario creado con email en minúsculas, agregado a sesión (`session.add`), persistido (`commit`) y refrescado (`refresh`) | **PASS** |
+| **PU-14: Auth Service** | Actualización de perfil para usuario ya existente sincronizado (`create_user_from_firebase`) | Claims con UID ya existente y nombre nuevo. Mock retornando usuario existente | Perfil actualizado con nuevo nombre y timestamp `updated_at`, ejecutando `commit` y `refresh` | **PASS** |
+| **PU-15: Auth Service** | Rechazo de claims incompletos sin UID o sin Email | Claims faltantes: `{"uid": "user-123"}` (sin email) o `{"email": "..."}` (sin uid) | `HTTPException(401)` con detalle *"El token no contiene una identidad válida."* | **PASS** |
+| **PU-16: Auth Service** | Rechazo de claims con formato de correo sintácticamente inválido | Claims con `email="invalid-not-an-email"` | `HTTPException(422)` con detalle *"El correo de Firebase no tiene un formato válido."* | **PASS** |
+| **PU-17: Auth Service** | Prevención de conflicto por correo duplicado asignado a otra cuenta | Intento de registro con UID de atacante pero con email perteneciente a otro usuario existente | `HTTPException(409)` con detalle *"El correo ya está registrado con otra cuenta."* | **PASS** |
+| **PU-18: Auth Service** | Delegación de creación de JWT a módulo de seguridad (`create_access_token`) | Objeto `User(firebase_uid="uid-abc", email="user@mealmuse.com")` | Invocación a `security.create_access_token` con UID y diccionario de claims | **PASS** |
+| **PU-19: Auth Service** | Orquestación de registro de usuario (`register_user`) | `id_token="raw-id-token"`, `nombre="Reg Name"`. Mock de `verify_firebase_token` | Sincronización y persistencia delegadas a `create_user_from_firebase` | **PASS** |
+| **PU-20: Auth Service** | Delegación de autenticación de usuario (`authenticate_user`) | `id_token="raw-id-token"`. Mock de `register_user` | Invocación directa a `register_user(session, id_token)` | **PASS** |
+| **PU-21: Auth Service** | Cierre de sesión y revocación exitosa de tokens en Firebase (`revoke_firebase_token`) | `id_token="valid-id-token"`. Mock de `verify_firebase_token` retornando claims | Invocación a `firebase_admin.auth.revoke_refresh_tokens(claims["uid"])` | **PASS** |
+| **PU-22: Auth Service** | Manejo de excepción durante la revocación de tokens en Firebase | Mock de `firebase_admin.auth.revoke_refresh_tokens` lanzando `ValueError` | `HTTPException(401)` con detalle *"No se pudo cerrar la sesión de Firebase."* | **PASS** |
+
+---
+
 ## 3. Registro de Hallazgos y Refactorizaciones Pedagógicas
 
-- **Hallazgo Crítico en `app.core.security.get_current_user`:**
+- **Hallazgo Crítico en `app.core.security.get_current_user` (Sprint 2 / Fase 2.1):**
   - *Diagnóstico:* Se detectó que el mecanismo de *fallback* para soportar tanto JWTs locales como ID tokens directos de Firebase estaba bloqueado. Al fallar `_decode_access_token`, se capturaba la excepción `HTTPException` y se relanzaba de inmediato (`raise`), impidiendo que el flujo alcanzara la llamada a `verify_firebase_token(token)`.
   - *Refactorización Aplicada:* Se rediseñó el bloque `try/except` para intentar primero la resolución del token JWT local y, en caso de fallo, capturar la excepción y verificar el token contra Firebase Admin SDK antes de emitir el error `401 Unauthorized`.
