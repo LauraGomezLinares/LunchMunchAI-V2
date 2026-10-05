@@ -94,12 +94,6 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     token = credentials_data.credentials
-    # ANÁLISIS CRÍTICO DE FALLO Y REFACTORIZACIÓN PEDAGÓGICA:
-    # Anteriormente, `_decode_access_token` lanzaba `HTTPException` al fallar la decodificación del JWT local,
-    # y el bloque `except HTTPException: raise` capturaba y relanzaba el error de inmediato, haciendo que el
-    # fallback `verify_firebase_token(token)` fuera código muerto e inalcanzable para tokens de Firebase.
-    # Ahora, intentamos decodificar el JWT local; si falla (por ser un token externo de Firebase o inválido),
-    # recurrimos a la verificación con Firebase Admin SDK.
     user = None
     try:
         payload = _decode_access_token(token)
