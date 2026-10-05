@@ -279,5 +279,24 @@ def client_fixture(
 - **Módulos cubiertos:** `routers.health`, `routers.auth`, `routers.pantry`.
 - **Validaciones de Seguridad:** Confirmado el aislamiento multiusuario estricto en inventario.
 
-### 6.5. Próximo Paso: Fase 4 (Pruebas de Estrés y Carga con Locust)
-- Implementación de `tests/performance/locustfile.py` para simular tráfico concurrente en endpoints clave.
+### 6.5. Fase 4: Pruebas de Estrés y Carga con Locust
+
+1. **Script de carga implementado:** [backend/tests/performance/locustfile.py](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/backend/tests/performance/locustfile.py)
+   - **Distribución:** 80% hacia `GET /health` (`@task(4)`) y 20% hacia `GET /api/v1/pantry/` (`@task(1)`).
+   - **Autenticación Segura (Zero-Quota Impact):** Generación de JWT local con pre-siembra de usuario para proteger las cuotas de Google Firebase.
+2. **Documentación formal:** [Docs/test/sprint2/testEstres.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/test/sprint2/testEstres.md)
+
+#### Comandos de Ejecución Local:
+
+- **Terminal 1 (Levantar Uvicorn):**
+  ```powershell
+  cd c:\Proyectos\Universidad\Ciclo_9\Integrador\LunchMunchAI-V2-1\backend
+  .\.venv\Scripts\uvicorn.exe app.main:app --host 127.0.0.1 --port 8000
+  ```
+
+- **Terminal 2 (Lanzar Locust en modo Headless):**
+  ```powershell
+  cd c:\Proyectos\Universidad\Ciclo_9\Integrador\LunchMunchAI-V2-1\backend
+  .\.venv\Scripts\locust.exe -f tests/performance/locustfile.py --headless -u 50 -r 5 --run-time 30s --host http://127.0.0.1:8000 --html tests/reportes/test/sprint2/report_estres.html
+  ```
+- **Reporte generado:** `backend/tests/reportes/test/sprint2/report_estres.html`

@@ -19,6 +19,11 @@ from app.core.security import (
 from app.models.user import User
 
 
+# EXPLICACIÓN ARQUITECTÓNICA (POR QUÉ Y CÓMO):
+# En las pruebas unitarias de seguridad aislamos completamente las dependencias externas
+# (Google Firebase Admin SDK y base de datos SQLModel/SQLAlchemy) mediante `pytest-mock` y `unittest.mock`.
+# Esto permite validar la lógica de cifrado, decodificación, expiración y control de acceso
+# de manera determinista, instantánea y sin efectos secundarios en disco o red.
 
 
 def test_create_access_token_structure() -> None:
