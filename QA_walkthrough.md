@@ -229,15 +229,20 @@ def client_fixture(
 - **Resultado:** 10 de 10 pruebas unitarias aprobadas (**10 PASSED**).
 - **Reporte generado:** `backend/report.html`
 
-### 5.3. Ejecución y Reporte Visual de `tests/unit/test_auth_service.py`
+### 5.4. Ejecución y Reporte Visual de `tests/unit/test_schemas.py`
 
 - **Comando ejecutado:**
   ```powershell
-  & "backend/.venv/Scripts/pytest.exe" tests/unit/test_auth_service.py -v --html=report_auth_service.html --self-contained-html
+  & "backend/.venv/Scripts/pytest.exe" tests/unit/test_schemas.py -v --html=report_schemas.html --self-contained-html
   ```
-- **Resultado:** 12 de 12 pruebas unitarias aprobadas (**12 PASSED**).
-- **Reporte generado:** `backend/report_auth_service.html`
-- **Detalle formal registrado:** [Docs/registro_pruebas_sprint2.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/registro_pruebas_sprint2.md) (Casos PU-11 a PU-22).
+- **Resultado:** 18 de 18 pruebas unitarias aprobadas (**18 PASSED**).
+- **Reporte generado:** `backend/report_schemas.html`
+- **Detalle formal registrado:** [Docs/registro_pruebas_sprint2.md](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/Docs/registro_pruebas_sprint2.md) (Casos PU-23 a PU-40).
 
-### 5.4. Próximos Pasos en Fase 2
-1. `tests/unit/test_schemas.py` (Validación de invariantes en esquemas Pydantic).
+### 5.5. Cierre de Fase 2 (Pruebas Unitarias)
+- **Total de pruebas unitarias ejecutadas:** 40
+- **Total aprobadas:** 40 / 40 (**100% PASS**)
+- **Módulos cubiertos:** `core.security`, `services.auth_service`, `schemas.pantry`, `schemas.auth`, `schemas.user`.
+
+### 5.6. Próximo Paso: Fase 3 (Pruebas de Integración)
+- Implementación de `tests/integration/test_health_api.py`, `tests/integration/test_auth_api.py` y `tests/integration/test_pantry_api.py` utilizando SQLite en memoria con `StaticPool` y fixtures de [conftest.py](file:///c:/Proyectos/Universidad/Ciclo_9/Integrador/LunchMunchAI-V2-1/backend/tests/conftest.py).
