@@ -1,4 +1,4 @@
-"""User profile request and response schemas."""
+"""schemas de request y rpta de perfil de usuario."""
 
 from datetime import datetime
 from typing import Any
@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserBase(BaseModel):
-    """Fields shared by user profile schemas."""
+    """campos compartidor por schemas del perfil de usuario """
 
     nombre: str = Field(default="", max_length=120)
     email: EmailStr
@@ -17,7 +17,7 @@ class UserBase(BaseModel):
 
 
 class UserRead(UserBase):
-    """Public representation of a local user."""
+    """representacion publica de un usuario local"""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -27,7 +27,7 @@ class UserRead(UserBase):
 
 
 class UserUpdate(BaseModel):
-    """Editable profile fields for future profile endpoints."""
+    """campos editables del perfil para futuros endpoints del perfil"""
 
     nombre: str | None = Field(default=None, max_length=120)
     alergias: dict[str, Any] | list[Any] | None = None

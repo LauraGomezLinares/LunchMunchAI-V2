@@ -1,4 +1,4 @@
-"""Personalized recipe generation endpoint with deterministic safety checks."""
+"""endpoint de generacion de receta personalizada con comprobaciones de seguridad deterministas"""
 
 import asyncio
 
@@ -32,11 +32,10 @@ async def generate_recipe(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> RecipeRead:
-    """Generate a recipe using the selected provider and enforce allergy checks.
-
-    Provider calls have a 15-second ceiling. Deterministic allergen failures are
-    retried up to three times; the response schema remains the same regardless
-    of whether the provider is local, mocked, or external.
+    """
+    genera una receta usando el proveedor seleccionado y cumple los checks de alergias.
+    la llamada al proveedor tienen un limite de 15 sg, fallos de los alergenos deterministas se reintentan 3 veces
+    la rpta del schema se mantiene igual independientemente si el proveedor es local, simulado o externo 
     """
     prompt = build_recipe_context(session, current_user.id)
     allergies = current_user.alergias if isinstance(current_user.alergias, list) else []

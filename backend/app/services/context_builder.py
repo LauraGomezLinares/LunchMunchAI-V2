@@ -1,4 +1,4 @@
-"""Build personalized recipe-generation context from persisted user data."""
+"""construye una generacion de recetas personalizadas desde la info del usuario persistida"""
 
 from uuid import UUID
 
@@ -14,12 +14,11 @@ EMPTY_PANTRY_PROMPT = (
 
 
 def build_recipe_context(session: Session, user_id: UUID) -> str:
-    """Build the stable provider context from the user's persisted data.
-
-    Pantry rows are scoped by `usuario_id`. With a non-empty pantry, the result
-    includes pantry names and the user's allergy list. With no rows, it returns
-    the exact fallback requested by Sprint 2; the recipe router separately
-    appends allergies so providers still receive safety restrictions.
+    """
+    construye el contexto estable para el proveedor desde la info persistida del usuario
+    filas de la despensa son delimitadas desde `usuario_id`, con una despensa no vacia el resultado incluye nombres
+    de la despensa y la lista de las alergias del usuario, cuando esta vacia retorna el fallback del sprint 02, el ruter de
+    recetas separadamente añade alergias por separado para que el proveedor aun reciba las restricciones de seguridad.
     """
     pantry_items = session.exec(
         select(PantryItem).where(PantryItem.usuario_id == user_id)

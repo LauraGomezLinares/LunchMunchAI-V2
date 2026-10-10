@@ -1,4 +1,4 @@
-"""Provider-neutral asynchronous interface for recipe language models."""
+"""interfaz asincrona neutral del proveedor para mdoelos de lenguaje de recetas."""
 
 import json
 import os
@@ -14,15 +14,15 @@ from app.schemas.recipes import RecipeRead
 
 
 class AIProvider(ABC):
-    """Common asynchronous contract for local, mock, and external providers."""
+    """contratos asincronos comunes para proveedores locales, simulados y externos"""
 
     @abstractmethod
     async def generate_recipe(self, prompt: str) -> RecipeRead:
-        """Generate one recipe from the assembled system prompt."""
+        """genera una receta desde el request del sistema ensamblado"""
 
 
 class MockProvider(AIProvider):
-    """Return one fixed example; intended for tests and demos only."""
+    """retorna un ejemplo fijo, para tests y demos solamente"""
 
     async def generate_recipe(self, prompt: str) -> RecipeRead:
         del prompt
@@ -38,10 +38,10 @@ class MockProvider(AIProvider):
 
 
 class APIProvider(AIProvider):
-    """Call an OpenAI-compatible chat API using environment-only credentials.
-
-    Configure `AI_API_URL`, `AI_API_KEY`, and `AI_MODEL`. The model must return
-    the recipe JSON contract; the router still applies local allergy validation.
+    """
+    llama a una api de chat compatible con OpenAI usando solo credenciales del entorno.
+    configura `AI_API_URL`, `AI_API_KEY`, y `AI_MODEL`, el modelo debe retornar el contrato json de la receta, el ruter debe 
+    aplicar validacion local de alergias.
     """
 
     async def generate_recipe(self, prompt: str) -> RecipeRead:
@@ -76,15 +76,15 @@ class APIProvider(AIProvider):
 
 
 class RecipeProviderError(RuntimeError):
-    """Provider-level failure translated by the HTTP router to status 502."""
+    """error a nivel de proveedor traducido por el ruter http a status 502."""
 
 
 class NoLocalRecipeError(RecipeProviderError):
-    """Raised when the local corpus has no recipe matching pantry and restrictions."""
+    """cuando el corpus local no tiene recetas que coincidan con la despensa y restricciones"""
 
 
 def _context_values(prompt: str, label: str) -> list[str]:
-    """Read a bracketed value list from the stable context prompt format."""
+    """Lee una lista de valores entre corchetes del formato de solicitud de contexto estable"""
     match = re.search(rf"{re.escape(label)}: \[([^\]]*)\]", prompt)
     if not match:
         return []
@@ -92,12 +92,12 @@ def _context_values(prompt: str, label: str) -> list[str]:
 
 
 def _excluded_recipe_names(prompt: str) -> list[str]:
-    """Extract titles supplied by the client through its generate-another option."""
+    """extrae titulos dados por el cliente mediante su generacion de otra opcion"""
     return re.findall(r"Excluir la receta \[([^\]]+)\]", prompt, flags=re.IGNORECASE)
 
 
 def _extra_exclusions(prompt: str) -> list[str]:
-    """Extract allergen and ingredient feedback added after an unsafe result."""
+    """agregado alergenos y feedback de ingredientes añadidos dsps de un resultado inseguro"""
     return re.findall(
         r"no incluyas el alérgeno ([^ ]+) ni el ingrediente ([^.]+)",
         prompt,

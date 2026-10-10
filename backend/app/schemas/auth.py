@@ -1,4 +1,4 @@
-"""Authentication request and response schemas."""
+"""schema de requests y rptas de auth"""
 
 from pydantic import BaseModel, Field
 
@@ -6,7 +6,7 @@ from app.schemas.user import UserRead
 
 
 class UserRegister(BaseModel):
-    """Firebase registration payload; passwords never reach this API."""
+    """payload de registro de firebase, contras nunca llegan a esta api."""
 
     id_token: str = Field(
         min_length=1, description="Firebase ID token obtained by the mobile client"
@@ -15,7 +15,7 @@ class UserRegister(BaseModel):
 
 
 class UserLogin(BaseModel):
-    """Firebase login payload."""
+    """payload de logueo de firebase"""
 
     id_token: str = Field(
         min_length=1, description="Firebase ID token obtained by the mobile client"
@@ -23,11 +23,11 @@ class UserLogin(BaseModel):
 
 
 class FirebaseLoginRequest(UserLogin):
-    """Explicit Firebase login request used by `/firebase-login`."""
+    """request de logueo de firebase explicita usada por `/firebase-login`"""
 
 
 class Token(BaseModel):
-    """Signed API session token and synchronized profile."""
+    """token de sesion de api firmado perfil sincronizado"""
 
     access_token: str
     token_type: str = "bearer"

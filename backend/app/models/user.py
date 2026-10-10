@@ -1,4 +1,4 @@
-"""Local user persistence model."""
+"""modelo de persistencia de usuario local"""
 
 from datetime import datetime, timezone
 from typing import Any
@@ -9,7 +9,7 @@ from sqlmodel import Field, SQLModel
 
 
 class User(SQLModel, table=True):
-    """Application profile synchronized from Firebase Authentication."""
+    """perfil sincronizado desde la auth de firebase"""
 
     __tablename__ = "user"
 

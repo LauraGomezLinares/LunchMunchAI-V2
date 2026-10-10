@@ -1,4 +1,4 @@
-"""Small local ingredient taxonomy for canonicalization and classification."""
+"""taxonomia de ingredientes locales a pequeña escala para estandarizacion y clasificacion"""
 
 import unicodedata
 import re
@@ -7,12 +7,13 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class IngredientInfo:
-    """Local classification record for one normalized food concept.
-
-    `canonical` is the stable identity used to compare inventory with recipes;
-    `category` is a broad food group; `aliases` are accepted Spanish/English
-    names; and `allergens` lists known profile labels associated with the item.
-    This record is a lookup aid, not a complete food ontology.
+    """
+    record de clasificacion local para un concepto de comida normalizado
+    `canonical` es la identidad estable usada para comparar inventario con recetas;
+    `category`es un grupo de comida grande;
+    `aliases` son nombres en ingles/español aceptables;
+    `allergens` lista etiquetas de perfil conocidas asociadas con los items; 
+    este record es una ayuda, no una ontologia de comida completa
     """
 
     canonical: str
@@ -59,7 +60,7 @@ INGREDIENTS = (
 
 
 def normalize_ingredient(value: str) -> str:
-    """Normalize an ingredient phrase for accent- and punctuation-free matching."""
+    """normaliza una frase de ingrediente para q coincida sin acentos ni signos de puntuacion"""
     decomposed = unicodedata.normalize("NFKD", value.casefold())
     normalized = "".join(
         character if character.isalnum() else " "
@@ -70,11 +71,11 @@ def normalize_ingredient(value: str) -> str:
 
 
 def classify_ingredient(value: str) -> IngredientInfo | None:
-    """Resolve a known ingredient phrase without guessing unknown names.
-
-    Alias matching uses complete words, so `egg` does not classify `eggplant`.
-    If aliases overlap, the longest matching alias wins (for example, a more
-    specific compound name wins over one of its shorter component words).
+    """
+    resuelve una frase de ingredientes conocidos sin adivinar nombres desconocidos
+    coincidencia de aliases usa palabras completas, entonces `egg` no clasifica como `eggplant`
+    si los aliases se superponen la coincidencia de alias mas larga gana (Por ejemplo, un nombre compuesto más específico 
+    prevalece sobre una de sus palabras componentes más cortas.)
     """
     normalized = normalize_ingredient(value)
     if not normalized:

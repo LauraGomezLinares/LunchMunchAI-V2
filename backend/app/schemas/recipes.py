@@ -1,4 +1,4 @@
-"""Recipe generation request and strict response contracts."""
+"""solicitud de generacion de recetas y contrato de rpta estricta."""
 
 from typing import Literal
 
@@ -6,13 +6,13 @@ from pydantic import BaseModel, Field
 
 
 class RecipeGenerateRequest(BaseModel):
-    """Optional title to omit when the client requests another suggestion."""
+    """titulo opcional para omitir cuando el cliente quiera otra sugerencia"""
 
     excluir_receta: str | None = Field(default=None, min_length=1, max_length=200)
 
 
 class RecipeRead(BaseModel):
-    """Stable JSON response shared by local, mock, and external providers."""
+    """rpta json estable compartida por proveedores locales, simulados y externos."""
 
     nombre: str
     tiempo_estimado_minutos: int = Field(ge=1)

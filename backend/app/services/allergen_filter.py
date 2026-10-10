@@ -1,4 +1,4 @@
-"""Deterministic checks that prevent prohibited allergens in recipes."""
+"""checks deterministas que prohiben alergenos en las recetas"""
 
 import unicodedata
 from collections.abc import Iterable
@@ -46,7 +46,7 @@ ALLERGEN_ALIASES = {
 
 
 class AllergenDetectedException(Exception):
-    """Raised when a recipe ingredient contains a prohibited allergen."""
+    """cuando un ingrediente de la receta contiene un alergeno prohibido"""
 
     def __init__(self, allergen: str, ingredient: str) -> None:
         self.allergen = allergen
@@ -67,12 +67,12 @@ def _normalize(value: str) -> str:
 def validate_recipe_ingredients(
     ingredients: Iterable[str], allergies: Iterable[str]
 ) -> None:
-    """Reject a recipe when an ingredient contains an allergy label or known alias.
-
-    Text is case-folded, stripped of diacritics and non-alphanumeric characters,
-    then compared using substring matching. The alias table improves matching
-    across Spanish/English names, but it is finite and cannot detect hidden
-    ingredients, brand-specific compounds, traces, or cross-contamination.
+    """
+    rechaza una receta cuando un ingrediente contiene una etiqueta de alergia o un alias desconocido
+    el texto se divide en mayus y minus, se eliminan diacriticos y caracteres no alfanumericos, luego se compara
+    con la coincidencia de subcadenas, la tabla de alias mejora la coincidencia entre nombres en ingles y español
+    mas es finita y no puede detectar ingredientes ocultos y compuestos especificos de la marca, trazas o contaminacion
+    cruzada. 
     """
     normalized_allergies: list[tuple[str, str]] = []
     for allergy in allergies:

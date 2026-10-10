@@ -1,4 +1,4 @@
-"""Request and response contracts for editable user profile fields."""
+"""contratos de request y rpta para campos editables en el perfil de usuario"""
 
 from uuid import UUID
 
@@ -17,10 +17,10 @@ ALLOWED_ALLERGIES = (
 
 
 class ProfileUpdate(BaseModel):
-    """Partial profile update containing only the allergy array.
-
-    Every value must match the public catalog; FastAPI returns HTTP 422 for
-    unknown labels.
+    """
+    actu parcial del perfil conteniendo solamente la matriz de alergias
+    cada valor debe coincidir con el catalogo publico; fastapi retorna http 422 para las
+    etiquetas desconocidas.
     """
 
     alergias: list[str]
@@ -36,7 +36,7 @@ class ProfileUpdate(BaseModel):
 
 
 class ProfileRead(BaseModel):
-    """Profile response consumed by authenticated clients."""
+    """rpta del perfil consumido por clientes autenticados"""
 
     model_config = ConfigDict(from_attributes=True)
 

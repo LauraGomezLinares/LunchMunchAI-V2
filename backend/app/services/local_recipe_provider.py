@@ -1,4 +1,4 @@
-"""Zero-cost recipe retrieval from the project's locally authored corpus."""
+"""Recuperación de recetas sin coste alguno a partir del corpus de recetas creadas localmente por el proyecto."""
 
 from dataclasses import dataclass
 
@@ -18,7 +18,7 @@ from app.services.ingredient_catalog import classify_ingredient, normalize_ingre
 
 @dataclass(frozen=True)
 class LocalRecipe:
-    """Wrapper for one immutable recipe entry in the locally authored corpus."""
+    """Wrapper para una entrada de receta inmutable en el corpus de autoría local."""
 
     recipe: RecipeRead
 
@@ -132,13 +132,13 @@ LOCAL_RECIPES = (
 
 
 class LocalRecipeProvider(AIProvider):
-    """Retrieve a recipe without network calls or a hosted generative model.
+    """Recupera una receta sin llamadas a la red ni un modelo generativo alojado.
+    La solicitud incluye la despensa del usuario, sus alergias y, opcionalmente, un título excluido.
 
-    The prompt carries the user's pantry, allergies, and optional excluded title.
-    Candidates must pass allergy checks and, when pantry items exist, match at
-    least one classified pantry ingredient. Ranking is by number of pantry
-    matches; ties keep the corpus order. This is catalog retrieval, not free-form
-    recipe synthesis, so corpus coverage limits what can be suggested.
+    Las recetas candidatas deben superar las comprobaciones de alergias y, si existen ingredientes en la despensa, coincidir 
+    conal menos un ingrediente clasificado. La clasificación se basa en el número de coincidencias con la despensa; en 
+    caso de empate, se mantiene el orden del corpus. Se trata de una recuperación de catálogo, no de una síntesis de recetas 
+    de formato libre,por lo que la cobertura del corpus limita las sugerencias.
     """
 
     async def generate_recipe(self, prompt: str) -> RecipeRead:
@@ -190,10 +190,11 @@ class LocalRecipeProvider(AIProvider):
 
 
 def _matches_recipe(pantry_item: str, ingredients: list[str]) -> bool:
-    """Compare pantry and recipe items by canonical taxonomy identity.
+    """Compara los artículos de la despensa y de las recetas según su taxonomía canónica.
 
-    Unknown pantry names only match an exactly normalized recipe ingredient;
-    loose substring matching could incorrectly treat `salt` as part of `salmon`.
+    Los nombres desconocidos de la despensa solo coinciden con un ingrediente de la receta normalizado con exactitud;
+
+    la coincidencia de subcadenas menos precisa podría tratar incorrectamente la «sal» como parte del «salmón».
     """
     pantry_classification = classify_ingredient(pantry_item)
     if pantry_classification is None:

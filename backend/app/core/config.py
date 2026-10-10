@@ -1,4 +1,4 @@
-"""Application configuration loaded from environment variables."""
+"""config de la app desde las variables del entorno."""
 
 from functools import lru_cache
 from typing import Annotated
@@ -14,7 +14,7 @@ def _parse_origins(value: str | list[str]) -> list[str]:
 
 
 class Settings(BaseSettings):
-    """Settings required by the API and its authentication layer."""
+    """config requerida para la api y su auth"""
 
     model_config = SettingsConfigDict(
         env_file=(".env", "backend/.env"),
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    """Return the cached application settings."""
+    """retorna la config de la app almacenada en cache"""
     return Settings()
 
 

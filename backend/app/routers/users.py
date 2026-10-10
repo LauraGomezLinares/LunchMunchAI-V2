@@ -1,4 +1,4 @@
-"""Authenticated user profile endpoints."""
+"""endpoints de perfil de usuarios autenticados"""
 
 from datetime import datetime, timezone
 
