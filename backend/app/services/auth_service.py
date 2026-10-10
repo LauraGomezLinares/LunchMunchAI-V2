@@ -1,4 +1,4 @@
-"""Authentication orchestration and Firebase-to-local user synchronization."""
+"""orquestacion de autenticacion y sincronizacion de usuarios entre firebase y red local"""
 
 from datetime import datetime, timezone
 from typing import Any
@@ -14,17 +14,17 @@ from app.models.user import User
 
 
 def get_user_by_email(session: Session, email: str) -> User | None:
-    """Find a local user by normalized email."""
+    """encontrar un usuario local por email normalizado"""
     return session.exec(select(User).where(User.email == email.lower())).first()
 
 
 def get_user_by_firebase_uid(session: Session, firebase_uid: str) -> User | None:
-    """Find a local user by Firebase subject."""
+    """encontrar un usuario local por tema de firebase"""
     return session.exec(select(User).where(User.firebase_uid == firebase_uid)).first()
 
 
 def verify_firebase_token(id_token: str) -> dict[str, Any]:
-    """Verify an ID token through Firebase Admin SDK."""
+    """verificar un token id por el admin sdk de firebase"""
     return _verify_firebase_token(id_token)
 
 
@@ -33,7 +33,7 @@ def create_user_from_firebase(
     claims: dict[str, Any],
     nombre: str | None = None,
 ) -> User:
-    """Create or update a local profile from trusted Firebase claims."""
+    """crea o actualiza un perfil local desde declaraciones de confianza de firebase"""
     firebase_uid = claims.get("uid") or claims.get("sub")
     email = claims.get("email")
     if not firebase_uid or not email:
@@ -72,22 +72,22 @@ def create_user_from_firebase(
 
 
 def create_access_token(user: User) -> str:
-    """Create an API token linked to a synchronized Firebase user."""
+    """crea un token de api linkeada a un usuario de firebase sincronizado"""
     return _create_access_token(str(user.firebase_uid), {"email": user.email})
 
 
 def register_user(session: Session, id_token: str, nombre: str | None = None) -> User:
-    """Register through Firebase and synchronize the local profile."""
+    """registra a traves de firebase y sincroniza el perfil local"""
     return create_user_from_firebase(session, verify_firebase_token(id_token), nombre)
 
 
 def authenticate_user(session: Session, id_token: str) -> User:
-    """Authenticate through Firebase and synchronize the local profile."""
+    """autentica a traves de firebase y sincroniza el perfil local"""
     return register_user(session, id_token)
 
 
 def revoke_firebase_token(id_token: str) -> None:
-    """Revoke a Firebase refresh session when a raw Firebase token is supplied."""
+    """revoca una sesion de actualizacion de firebase cuando se da un token de firebase sin procesar"""
     claims = verify_firebase_token(id_token)
     try:
         auth.revoke_refresh_tokens(claims["uid"])

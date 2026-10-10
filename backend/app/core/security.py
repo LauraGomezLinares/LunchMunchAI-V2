@@ -1,4 +1,4 @@
-"""Firebase and application-token security dependencies."""
+"""dependencias de seguridad de firebase y token de la app. """
 
 import json
 import logging
@@ -21,14 +21,14 @@ bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def _firebase_app() -> firebase_admin.App:
-    """Initialize Firebase once, using inline JSON credentials when configured."""
+    """Inicia firebase una vez usando credenciales JSON cuando este configurado."""
     if firebase_admin._apps:
         return firebase_admin.get_app()
-    if not settings.firebase_credentials_json:
+    if not settings.firebase_credentials_path:
         raise RuntimeError("Firebase credentials are not configured")
     try:
-        credential_data = json.loads(settings.firebase_credentials_json)
-        credential = credentials.Certificate(credential_data)
+        #credential_data = json.loads(settings.firebase_credentials_path)
+        credential = credentials.Certificate(settings.firebase_credentials_path)
     except (json.JSONDecodeError, ValueError, TypeError) as exc:
         logger.error("Invalid Firebase credentials configuration")
         raise RuntimeError("Invalid Firebase credentials configuration") from exc
@@ -41,7 +41,7 @@ def _firebase_app() -> firebase_admin.App:
 
 
 def verify_firebase_token(id_token: str) -> dict[str, Any]:
-    """Verify a Firebase ID token and return its decoded claims."""
+    """Verifica un token de id firebase y retorna su decodificacion"""
     try:
         _firebase_app()
         return auth.verify_id_token(id_token, check_revoked=True)
@@ -55,7 +55,7 @@ def verify_firebase_token(id_token: str) -> dict[str, Any]:
 
 
 def create_access_token(subject: str, claims: dict[str, Any] | None = None) -> str:
-    """Create a short-lived signed session token for the API."""
+    """crea un token de sesion firmado de poca duracion para la api."""
     now = datetime.now(timezone.utc)
     payload: dict[str, Any] = {
         "sub": subject,
@@ -84,7 +84,7 @@ def get_current_user(
     credentials_data: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     session: Session = Depends(get_session),
 ) -> User:
-    """Resolve the current local user from an API JWT or Firebase ID token."""
+    """Resuelve el usuario local desde un token jwt de api o de id de firebase."""
     from app.services.auth_service import get_user_by_firebase_uid
 
     if credentials_data is None:

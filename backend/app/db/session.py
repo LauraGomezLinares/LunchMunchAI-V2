@@ -1,4 +1,4 @@
-"""SQLModel engine and request-scoped database sessions."""
+"""Motor sqlmodel y sesiones de bd de solicitud."""
 
 from collections.abc import Generator
 
@@ -13,13 +13,13 @@ engine = create_engine(settings.database_url, echo=False, connect_args=connect_a
 
 
 def init_db() -> None:
-    """Create tables for local development when migrations are not yet applied."""
+    """Crea tablas para dev local cuando las migraciones aun no se aplican"""
     from app.models.user import User  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
 
 
 def get_session() -> Generator[Session, None, None]:
-    """Yield one database session per request."""
+    """devuelve una sesion de bd por solicitud"""
     with Session(engine) as session:
         yield session

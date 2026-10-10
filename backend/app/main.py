@@ -9,6 +9,8 @@ from app.core.config import settings
 from app.db.session import init_db
 from app.routers.auth import router as auth_router
 from app.routers.pantry import router as pantry_router
+from app.routers.recipes import router as recipes_router
+from app.routers.users import router as users_router
 
 
 @asynccontextmanager
@@ -28,6 +30,8 @@ app.add_middleware(
 )
 app.include_router(auth_router)
 app.include_router(pantry_router)
+app.include_router(users_router)
+app.include_router(recipes_router)
 
 
 @app.get("/health", tags=["health"])

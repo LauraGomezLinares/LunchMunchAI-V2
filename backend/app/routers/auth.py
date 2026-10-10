@@ -1,4 +1,4 @@
-"""Authentication HTTP endpoints."""
+"""endpoints auth HTTP"""
 
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
@@ -33,7 +33,7 @@ def _token_response(user: User) -> Token:
     },
 )
 def register(payload: UserRegister, session: Session = Depends(get_session)) -> Token:
-    """Register a Firebase user and create the matching local profile."""
+    """registra usuario a firebase y se crea el perfil local correspondiente"""
     return _token_response(register_user(session, payload.id_token, payload.nombre))
 
 
@@ -43,7 +43,7 @@ def register(payload: UserRegister, session: Session = Depends(get_session)) -> 
     responses={401: {"description": "Credenciales incorrectas"}},
 )
 def login(payload: UserLogin, session: Session = Depends(get_session)) -> Token:
-    """Authenticate with a Firebase ID token."""
+    """auth con un token de id firebase"""
     return _token_response(authenticate_user(session, payload.id_token))
 
 
@@ -55,17 +55,17 @@ def login(payload: UserLogin, session: Session = Depends(get_session)) -> Token:
 def firebase_login(
     payload: FirebaseLoginRequest, session: Session = Depends(get_session)
 ) -> Token:
-    """Verify Firebase and return a signed API session token."""
+    """revisa firebase y retorna un token de sesion de api firmado"""
     return _token_response(authenticate_user(session, payload.id_token))
 
 
 @router.get("/me", response_model=UserRead)
 def me(current_user: User = Depends(get_current_user)) -> UserRead:
-    """Return the authenticated user's local profile."""
+    """retorna el perfil local del usuario autentical"""
     return UserRead.model_validate(current_user)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout() -> None:
-    """End the local session; clients discard the short-lived JWT."""
+    """termina la sesion local, cliente descarta el jwt de corta duracion"""
     return None
