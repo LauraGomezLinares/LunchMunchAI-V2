@@ -3,10 +3,11 @@
 import asyncio
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.core.security import get_current_user
 from app.db.session import get_session
+from app.models.pantry import PantryItem
 from app.models.user import User
 from app.schemas.recipes import RecipeGenerateRequest, RecipeRead
 from app.services.ai_client import NoLocalRecipeError, RecipeProviderError, get_ai_provider
@@ -15,6 +16,7 @@ from app.services.allergen_filter import (
     validate_recipe_ingredients,
 )
 from app.services.context_builder import build_recipe_context
+from app.services.shopping_list import calcular_faltantes
 
 router = APIRouter(prefix="/api/v1/recipes", tags=["recipes"])
 GENERATION_TIMEOUT_SECONDS = 15
@@ -64,6 +66,15 @@ async def generate_recipe(
                 f"{exc.allergen} ni el ingrediente {exc.ingredient}."
             )
             continue
-        return recipe
+        pantry_items = session.exec(
+            select(PantryItem).where(PantryItem.usuario_id == current_user.id)
+        ).all()
+        return recipe.model_copy(
+            update={
+                "ingredientes_faltantes": calcular_faltantes(
+                    recipe.ingredientes, pantry_items
+                )
+            }
+        )
 
     raise HTTPException(status_code=422, detail=UNSAFE_RECIPE_MESSAGE)

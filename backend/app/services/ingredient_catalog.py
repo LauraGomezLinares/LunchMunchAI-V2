@@ -55,6 +55,7 @@ INGREDIENTS = (
     IngredientInfo("salmon", "pescado", ("salmon", "salmon fillet"), ("Pescado",)),
     IngredientInfo("atun", "pescado", ("atun", "tuna"), ("Pescado",)),
     IngredientInfo("camaron", "marisco", ("camaron", "camarones", "shrimp", "prawn"), ("Mariscos",)),
+    IngredientInfo("pollo", "proteina", ("pollo", "chicken")),
     IngredientInfo("agua", "liquido", ("agua", "water")),
 )
 

@@ -68,6 +68,7 @@ def test_generate_recipe_uses_local_provider_by_default(client: TestClient) -> N
         "calorias",
         "nutricion",
         "ingredientes",
+        "ingredientes_faltantes",
         "pasos",
         "apto_para_alergias",
     }
