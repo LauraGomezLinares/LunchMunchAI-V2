@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from app.schemas.recipes import RecipeRead
+from app.schemas.recipes import Nutricion, RecipeRead
 from app.services.ai_client import (
     AIProvider,
     NoLocalRecipeError,
@@ -29,7 +29,13 @@ LOCAL_RECIPES = (
             nombre="Bowl de arroz y verduras",
             tiempo_estimado_minutos=20,
             porciones=2,
-            calorias=0,
+            calorias=345,
+            nutricion=Nutricion(
+                calorias_kcal=345,
+                proteinas_g=8,
+                carbohidratos_g=53.5,
+                grasas_g=11,
+            ),
             ingredientes=[
                 "arroz",
                 "tomate",
@@ -51,7 +57,13 @@ LOCAL_RECIPES = (
             nombre="Lentejas con verduras",
             tiempo_estimado_minutos=35,
             porciones=3,
-            calorias=0,
+            calorias=280,
+            nutricion=Nutricion(
+                calorias_kcal=280,
+                proteinas_g=17,
+                carbohidratos_g=44,
+                grasas_g=4,
+            ),
             ingredientes=[
                 "lentejas",
                 "zanahoria",
@@ -74,7 +86,13 @@ LOCAL_RECIPES = (
             nombre="Ensalada de garbanzos",
             tiempo_estimado_minutos=15,
             porciones=2,
-            calorias=0,
+            calorias=344,
+            nutricion=Nutricion(
+                calorias_kcal=344,
+                proteinas_g=14,
+                carbohidratos_g=45,
+                grasas_g=12,
+            ),
             ingredientes=["garbanzos", "pepino", "tomate", "limón", "aceite de oliva"],
             pasos=[
                 "Escurre y enjuaga los garbanzos cocidos.",
@@ -89,7 +107,13 @@ LOCAL_RECIPES = (
             nombre="Avena con banana y canela",
             tiempo_estimado_minutos=10,
             porciones=1,
-            calorias=0,
+            calorias=253,
+            nutricion=Nutricion(
+                calorias_kcal=253,
+                proteinas_g=8,
+                carbohidratos_g=44,
+                grasas_g=5,
+            ),
             ingredientes=["avena", "banana", "canela", "agua"],
             pasos=[
                 "Calienta la avena con agua durante unos minutos.",
@@ -103,7 +127,13 @@ LOCAL_RECIPES = (
             nombre="Papas salteadas con pimiento",
             tiempo_estimado_minutos=25,
             porciones=2,
-            calorias=0,
+            calorias=263,
+            nutricion=Nutricion(
+                calorias_kcal=263,
+                proteinas_g=5,
+                carbohidratos_g=36,
+                grasas_g=11,
+            ),
             ingredientes=["papa", "pimiento", "cebolla", "aceite de oliva"],
             pasos=[
                 "Corta las papas y cocínalas en agua hasta que empiecen a suavizarse.",
@@ -118,7 +148,13 @@ LOCAL_RECIPES = (
             nombre="Tacos sencillos de frijoles y maíz",
             tiempo_estimado_minutos=20,
             porciones=2,
-            calorias=0,
+            calorias=312,
+            nutricion=Nutricion(
+                calorias_kcal=312,
+                proteinas_g=12,
+                carbohidratos_g=48,
+                grasas_g=8,
+            ),
             ingredientes=["frijoles", "maíz", "tomate", "cebolla", "limón"],
             pasos=[
                 "Calienta los frijoles cocidos y el maíz en una sartén.",
@@ -133,7 +169,13 @@ LOCAL_RECIPES = (
             nombre="Pasta con tomate y ajo",
             tiempo_estimado_minutos=25,
             porciones=2,
-            calorias=0,
+            calorias=362,
+            nutricion=Nutricion(
+                calorias_kcal=362,
+                proteinas_g=13,
+                carbohidratos_g=55,
+                grasas_g=10,
+            ),
             ingredientes=["pasta de trigo", "tomate", "ajo", "aceite de oliva"],
             pasos=[
                 "Cuece la pasta siguiendo las instrucciones del paquete.",
