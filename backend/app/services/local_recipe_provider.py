@@ -30,11 +30,18 @@ LOCAL_RECIPES = (
             tiempo_estimado_minutos=20,
             porciones=2,
             calorias=0,
-            ingredientes=["arroz", "tomate", "espinaca", "cebolla", "aceite de oliva"],
+            ingredientes=[
+                "arroz",
+                "tomate",
+                "espinaca",
+                "cebolla",
+                "leche",
+                "aceite de oliva",
+            ],
             pasos=[
                 "Cocina el arroz en agua hasta que quede tierno.",
                 "Saltea la cebolla, el tomate y la espinaca con aceite.",
-                "Sirve las verduras sobre el arroz.",
+                "Agrega leche para ligar las verduras y sírvelas sobre el arroz.",
             ],
             apto_para_alergias=True,
         )
@@ -45,11 +52,19 @@ LOCAL_RECIPES = (
             tiempo_estimado_minutos=35,
             porciones=3,
             calorias=0,
-            ingredientes=["lentejas", "zanahoria", "tomate", "cebolla", "ajo"],
+            ingredientes=[
+                "lentejas",
+                "zanahoria",
+                "tomate",
+                "cebolla",
+                "ajo",
+                "espinaca",
+            ],
             pasos=[
                 "Enjuaga las lentejas y ponlas a cocer en agua.",
                 "Agrega zanahoria, tomate, cebolla y ajo picados.",
                 "Cocina a fuego medio hasta que las lentejas estén suaves.",
+                "Incorpora la espinaca al final y deja que se marchite.",
             ],
             apto_para_alergias=True,
         )
@@ -143,12 +158,15 @@ class LocalRecipeProvider(AIProvider):
 
     async def generate_recipe(self, prompt: str) -> RecipeRead:
         pantry = _context_values(prompt, "Ingredientes en despensa")
+        expiring = _context_values(
+            prompt, "Ingredientes próximos a vencer (priorízalos)"
+        )
         allergies = _context_values(prompt, "Alergias prohibidas")
         excluded = {
             normalize_ingredient(name) for name in _excluded_recipe_names(prompt)
         }
 
-        candidates: list[tuple[int, LocalRecipe]] = []
+        candidates: list[tuple[int, int, LocalRecipe]] = []
         for local_recipe in LOCAL_RECIPES:
             recipe = local_recipe.recipe
             if normalize_ingredient(recipe.nombre) in excluded:
@@ -175,18 +193,23 @@ class LocalRecipeProvider(AIProvider):
                     for pantry_item in pantry
                     if _matches_recipe(pantry_item, recipe.ingredientes)
                 )
+                expiring_matched = sum(
+                    1
+                    for pantry_item in expiring
+                    if _matches_recipe(pantry_item, recipe.ingredientes)
+                )
                 if matched == 0:
                     continue
-                candidates.append((matched, local_recipe))
+                candidates.append((expiring_matched, matched, local_recipe))
             else:
-                candidates.append((0, local_recipe))
+                candidates.append((0, 0, local_recipe))
 
         if not candidates:
             raise NoLocalRecipeError(
                 "No hay una receta local compatible con la despensa y las restricciones."
             )
-        candidates.sort(key=lambda candidate: candidate[0], reverse=True)
-        return candidates[0][1].recipe.model_copy(deep=True)
+        candidates.sort(key=lambda candidate: (candidate[0], candidate[1]), reverse=True)
+        return candidates[0][2].recipe.model_copy(deep=True)
 
 
 def _matches_recipe(pantry_item: str, ingredients: list[str]) -> bool:

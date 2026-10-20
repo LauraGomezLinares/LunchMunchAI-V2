@@ -32,8 +32,11 @@ UnidadMedida = Literal[
     "lb",
     "oz",
     "l",
+    "L",
     "ml",
     "unidad",
+    "unidades",
+    "piezas",
 ]
 
 
@@ -60,3 +63,5 @@ class PantryItemRead(BaseModel):
     unidad: str
     fecha_caducidad: Optional[date]
     created_at: datetime
+    estado_vencimiento: str
+    dias_para_vencer: int | None
