@@ -13,8 +13,9 @@ from app.db.session import get_session
 from app.main import app
 from app.models.pantry import PantryItem
 from app.models.user import User
-from app.schemas.recipes import RecipeRead
+from app.schemas.recipes import Nutricion, RecipeRead
 from app.services.ai_client import MockProvider
+from app.services.local_recipe_provider import LOCAL_RECIPES
 from app.services import context_builder
 from app.routers import recipes as recipes_router
 
@@ -65,10 +66,45 @@ def test_generate_recipe_uses_local_provider_by_default(client: TestClient) -> N
         "tiempo_estimado_minutos",
         "porciones",
         "calorias",
+        "nutricion",
         "ingredientes",
+        "ingredientes_faltantes",
         "pasos",
         "apto_para_alergias",
     }
+    assert recipe["nutricion"]["calorias_kcal"] == recipe["calorias"]
+    assert all(
+        isinstance(recipe["nutricion"][field], (int, float))
+        and recipe["nutricion"][field] >= 0
+        for field in (
+            "calorias_kcal",
+            "proteinas_g",
+            "carbohidratos_g",
+            "grasas_g",
+        )
+    )
+
+
+@pytest.mark.parametrize("field", ["calorias_kcal", "proteinas_g", "carbohidratos_g", "grasas_g"])
+def test_nutrition_rejects_negative_values(field: str) -> None:
+    with pytest.raises(ValueError):
+        Nutricion(**{field: -1})
+
+
+@pytest.mark.parametrize("local_recipe", LOCAL_RECIPES)
+def test_local_recipe_nutrition_matches_legacy_calories_and_macros(
+    local_recipe,
+) -> None:
+    recipe = local_recipe.recipe
+    nutrition = recipe.nutricion
+    assert nutrition is not None
+    assert recipe.calorias == nutrition.calorias_kcal
+    macro_calories = (
+        4 * nutrition.proteinas_g
+        + 4 * nutrition.carbohidratos_g
+        + 9 * nutrition.grasas_g
+    )
+    assert abs(recipe.calorias - macro_calories) / recipe.calorias <= 0.10
 
 
 def test_local_provider_retrieves_recipe_matching_pantry(client: TestClient) -> None:

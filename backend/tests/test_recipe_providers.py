@@ -82,6 +82,9 @@ def test_spoonacular_maps_response_and_sends_pantry_and_allergy_filters(
 
     assert recipe.nombre == "Rice and vegetables"
     assert recipe.calorias == 385
+    assert recipe.nutricion is not None
+    assert recipe.nutricion.calorias_kcal == 385.2
+    assert recipe.nutricion.proteinas_g is None
     assert recipe.ingredientes == ["1 cup rice", "2 tomatoes"]
     assert recipe.pasos == ["Cook the rice."]
     _, params = fake_client.calls[0]
@@ -151,6 +154,7 @@ def test_themealdb_looks_up_full_meal_and_maps_measures(
     assert recipe.ingredientes == ["1 cup Rice", "2 Tomato"]
     assert recipe.pasos == ["Cook the rice.", "Add the tomato."]
     assert recipe.calorias == 0
+    assert recipe.nutricion is None
     assert fake_client.calls[0] == (
         "https://www.themealdb.com/api/json/v1/dev-key/filter.php",
         {"i": "tomato"},

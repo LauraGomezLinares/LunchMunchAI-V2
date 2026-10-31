@@ -10,7 +10,7 @@ from typing import Any
 
 import httpx
 
-from app.schemas.recipes import RecipeRead
+from app.schemas.recipes import Nutricion, RecipeRead
 
 
 class AIProvider(ABC):
@@ -31,6 +31,12 @@ class MockProvider(AIProvider):
             tiempo_estimado_minutos=20,
             porciones=2,
             calorias=420,
+            nutricion=Nutricion(
+                calorias_kcal=420,
+                proteinas_g=20,
+                carbohidratos_g=45,
+                grasas_g=17.8,
+            ),
             ingredientes=["arroz", "tomate", "espinaca", "aceite de oliva"],
             pasos=["Cocina el arroz.", "Saltea las verduras y sirve sobre el arroz."],
             apto_para_alergias=True,
@@ -226,19 +232,35 @@ def _spoonacular_recipe(data: dict[str, Any]) -> RecipeRead:
         for step in instruction.get("steps", [])
         if step.get("step")
     ]
-    calories = next(
-        (
-            int(round(nutrient.get("amount", 0)))
-            for nutrient in data.get("nutrition", {}).get("nutrients", [])
-            if nutrient.get("name", "").casefold() == "calories"
-        ),
-        0,
+    nutrient_values = {
+        str(nutrient.get("name", "")).casefold(): nutrient.get("amount")
+        for nutrient in data.get("nutrition", {}).get("nutrients", [])
+    }
+
+    def nutrient_value(name: str) -> float | None:
+        value = nutrient_values.get(name)
+        return float(value) if value is not None else None
+
+    calories = nutrient_value("calories")
+    nutrition = (
+        Nutricion(
+            calorias_kcal=calories,
+            proteinas_g=nutrient_value("protein"),
+            carbohidratos_g=nutrient_value("carbohydrates"),
+            grasas_g=nutrient_value("fat"),
+        )
+        if any(
+            nutrient_values.get(name) is not None
+            for name in ("calories", "protein", "carbohydrates", "fat")
+        )
+        else None
     )
     return RecipeRead(
         nombre=str(data.get("title") or "Receta"),
         tiempo_estimado_minutos=max(1, int(data.get("readyInMinutes") or 30)),
         porciones=max(1, int(data.get("servings") or 1)),
-        calorias=max(0, calories),
+        calorias=max(0, int(round(calories or 0))),
+        nutricion=nutrition,
         ingredientes=[ingredient for ingredient in ingredients if ingredient],
         pasos=steps or ["Consulta las instrucciones de preparación de la receta."],
         apto_para_alergias=True,
